@@ -1,0 +1,136 @@
+
+import { useState, useRef, useEffect } from "react";
+import { useAppContext } from "@/contexts/AppContext";
+import VideoPlayer from "@/components/VideoPlayer";
+import Navigation from "@/components/Navigation";
+import VideoUploader from "@/components/VideoUploader";
+import { useInView } from "react-intersection-observer";
+import { Button } from "@/components/ui/button";
+import { Upload } from "lucide-react";
+
+const Index = () => {
+  const { videos } = useAppContext();
+  const [showUploadModal, setShowUploadModal] = useState(false);
+  const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
+  const containerRef = useRef<HTMLDivElement>(null);
+  
+  // Create refs for each video to track which one is in view
+  const videoRefs = videos.map((_, index) => {
+    const { ref, inView } = useInView({
+      threshold: 0.6,
+    });
+    return { ref, inView };
+  });
+  
+  // Update current video index based on which video is in view
+  useEffect(() => {
+    const inViewIndex = videoRefs.findIndex(({ inView }) => inView);
+    if (inViewIndex !== -1) {
+      setCurrentVideoIndex(inViewIndex);
+    }
+  }, [videoRefs.map(({ inView }) => inView)]);
+  
+  // Handle scrolling to next/previous video
+  const scrollToVideo = (index: number) => {
+    if (containerRef.current && index >= 0 && index < videos.length) {
+      const videoHeight = containerRef.current.clientHeight;
+      containerRef.current.scrollTo({
+        top: index * videoHeight,
+        behavior: 'smooth'
+      });
+    }
+  };
+
+  return (
+    <div className="bg-app-dark text-white min-h-screen">
+      <Navigation />
+      
+      <div className="pt-0 pb-16 md:pt-16">
+        {videos.length > 0 ? (
+          <div 
+            ref={containerRef}
+            className="h-[calc(100vh-4rem)] overflow-y-scroll snap-y snap-mandatory"
+          >
+            {videos.map((video, index) => (
+              <div 
+                key={video.id} 
+                ref={videoRefs[index].ref}
+                className="h-full"
+              >
+                <VideoPlayer 
+                  video={video} 
+                  inView={videoRefs[index].inView} 
+                />
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center h-[calc(100vh-4rem)]">
+            <h2 className="text-2xl font-bold mb-4">No videos yet</h2>
+            <p className="text-gray-400 mb-8">Be the first to upload a video!</p>
+            <Button 
+              onClick={() => setShowUploadModal(true)}
+              className="bg-app-primary hover:opacity-90 flex items-center gap-2"
+            >
+              <Upload className="h-5 w-5" /> Upload Video
+            </Button>
+          </div>
+        )}
+      </div>
+      
+      {/* Video Upload Modal */}
+      <VideoUploader 
+        isOpen={showUploadModal}
+        onClose={() => setShowUploadModal(false)}
+      />
+    </div>
+  );
+};
+
+export default Index;
+
+
+BUILD APK WITH INFO BELOW
+
+
+Export Android Studio Project to APK
+1
+2
+To export an Android Studio project to an APK file, follow these steps:
+
+Open your project in Android Studio.
+
+Navigate to the "Build" menu at the top of the screen.
+
+Select "Build Bundle(s) / APK(s)" and then choose "Build APK(s)".
+
+Wait for the build process to complete. Once done, a notification will appear in the bottom-right corner of Android Studio.
+
+Click on the "locate" link in the notification to find your APK file. The APK file will be located in the build/outputs/apk directory of your project
+1
+.
+
+
+> vite_react_shadcn_ts@0.0.0 build:dev
+> vite build --mode development
+
+vite v5.4.6 building for development...
+transforming...
+Browserslist: caniuse-lite is outdated. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+✓ 16 modules transformed.
+x Build failed in 928ms
+error during build:
+[vite]: Rollup failed to resolve import "@capacitor/app" from "/builds/5/project/src/pages/Index.tsx".
+This is most likely unintended because it can break your application at runtime.
+If you do want to externalize this module explicitly add it to
+`build.rollupOptions.external`
+    at viteWarn (file:///builds/5/project/node_modules/vite/dist/node/chunks/dep-DyBnyoVI.js:65531:17)
+    at onwarn (file:///builds/5/project/node_modules/@vitejs/plugin-react-swc/index.mjs:203:9)
+    at onRollupWarning (file:///builds/5/project/node_modules/vite/dist/node/chunks/dep-DyBnyoVI.js:65561:5)
+    at onwarn (file:///builds/5/project/node_modules/vite/dist/node/chunks/dep-DyBnyoVI.js:65226:7)
+    at file:///builds/5/project/node_modules/rollup/dist/es/shared/node-entry.js:18669:13
+    at Object.logger [as onLog] (file:///builds/5/project/node_modules/rollup/dist/es/shared/node-entry.js:20307:9)
+    at ModuleLoader.handleInvalidResolvedId (file:///builds/5/project/node_modules/rollup/dist/es/shared/node-entry.js:19258:26)
+    at file:///builds/5/project/node_modules/rollup/dist/es/shared/node-entry.js:19216:26
